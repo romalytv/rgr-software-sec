@@ -1,5 +1,7 @@
 import base64
 import socket
+
+from Crypto.Protocol.KDF import PBKDF2
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
@@ -39,7 +41,10 @@ def server_program():
     decrypted_secret = cipher.decrypt(premaster_secret)
     print(f"Decrypted secret: {decrypted_secret.decode('utf-8')}")
 
-    session_key = get_random_bytes(16)
+    server_random = get_random_bytes(16)
+    print(f"Client random: {server_random.hex()}")
+
+    session_key = PBKDF2(premaster_secret, server_random, dkLen=32)
     print(f"Generated session key: {session_key.hex()}")
 
     conn.send(b"ready")

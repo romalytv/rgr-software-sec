@@ -1,7 +1,11 @@
 import base64
 import socket
+
+from Crypto.Protocol.KDF import PBKDF2
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Random import get_random_bytes
+
 
 def client_program():
     host = '127.0.0.1' # localhost
@@ -25,6 +29,12 @@ def client_program():
 
     client_socket.send(encrypted_secret)
     print("Encrypted secret sent to the server.")
+
+    client_random = get_random_bytes(16)
+    print(f"Client random: {client_random.hex()}")
+
+    session_key = PBKDF2(premaster_secret, client_random, dkLen=32)
+    print(f"Generated session key: {session_key.hex()}")
 
     ready_message = client_socket.recv(1024)
     print(f"Received message from the server: {ready_message.decode()}")
